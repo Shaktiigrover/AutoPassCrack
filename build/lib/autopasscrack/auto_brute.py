@@ -52,30 +52,37 @@ def brute_force(url, username, password_list, delay=2, success_url=None, verbose
                     username_field.send_keys(uname)
                 password_field.clear()
                 password_field.send_keys(pwd)
-                # Try to click common submit/login buttons
+                # Fully automatic submit button detection and click
                 try:
-                    # Only use common English submit/login button texts
-                    button_texts = [
-                        'submit', 'login', 'sign in', 'sign on', 'signon', 'signin', 'ok', 'go', 'continue', 'next', 'proceed', 'enter', 'confirm'
-                    ]
-                    button_clicked = False
-                    for text in button_texts:
+                    # Collect all candidate submit buttons
+                    candidates = []
+                    # All <button> elements
+                    candidates += driver.find_elements(By.TAG_NAME, 'button')
+                    # All <input type=submit>
+                    candidates += driver.find_elements(By.XPATH, "//input[@type='submit']")
+                    # Filter: if any candidate has value, aria-label, id, class containing submit/login
+                    filtered = []
+                    for el in candidates:
                         try:
-                            submit_btn = driver.find_element(By.XPATH, f"//button[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{text.lower()}')]")
-                            submit_btn.click()
-                            button_clicked = True
+                            v = (el.get_attribute('value') or '').lower()
+                            a = (el.get_attribute('aria-label') or '').lower()
+                            i = (el.get_attribute('id') or '').lower()
+                            c = (el.get_attribute('class') or '').lower()
+                            t = (el.text or '').lower()
+                            if any(x in v for x in ['submit','login']) or any(x in a for x in ['submit','login']) or any(x in i for x in ['submit','login']) or any(x in c for x in ['submit','login']) or any(x in t for x in ['submit','login']):
+                                filtered.append(el)
+                        except Exception:
+                            continue
+                    # If filtered found, try them first
+                    clicked = False
+                    for el in filtered + [e for e in candidates if e not in filtered]:
+                        try:
+                            el.click()
+                            clicked = True
                             break
                         except Exception:
                             continue
-                    if not button_clicked:
-                        # Try input[type=submit]
-                        try:
-                            submit_input = driver.find_element(By.XPATH, "//input[@type='submit']")
-                            submit_input.click()
-                            button_clicked = True
-                        except Exception:
-                            pass
-                    if not button_clicked:
+                    if not clicked:
                         # Fallback: send Enter key
                         password_field.send_keys(Keys.RETURN)
                 except Exception:
