@@ -1,4 +1,10 @@
-# autopasscrack
+# AutoPassCrack
+
+[![Code Size](https://img.shields.io/github/languages/code-size/HenryLok0/autopasscrack?style=flat-square&logo=github)](https://github.com/HenryLok0/autopasscrack)
+![PyPI - Version](https://img.shields.io/pypi/v/autopasscrack)
+
+[![MIT License](https://img.shields.io/github/license/HenryLok0/autopasscrack?style=flat-square)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/HenryLok0/autopasscrack?style=flat-square)](https://github.com/HenryLok0/autopasscrack/stargazers)
 
 Auto brute force web login forms tool
 
