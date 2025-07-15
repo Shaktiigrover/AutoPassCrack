@@ -37,6 +37,12 @@ autopasscrack https://example.com/login --username myuser --passwords passwords.
 # Specify only password file (no username)
 autopasscrack https://example.com/login --passwords passwords.txt
 
+# Specify only password string (no username, try all usernames)
+autopasscrack https://example.com/login --passwords Password123
+
+# Specify only password, use multiple candidates (comma separated, no username)
+autopasscrack https://example.com/login --passwords "Password123,abc123,letmein"
+
 # Specify only username (use auto password generation)
 autopasscrack https://example.com/login --username myuser
 
@@ -69,9 +75,11 @@ brute_force(
 ## Features
 - Auto-detects login form fields (username and/or password)
 - Supports custom password file or auto-generates passwords (all upper/lowercase letters, digits, special symbols)
+- Supports direct password string or comma-separated passwords via --passwords (no need for a file)
+- Supports auto-generating usernames (all upper/lowercase letters, digits, special symbols) if only --passwords is given and --username is omitted
 - Supports parallel browser windows with --workers
 - If no password file is provided, will use `default_passwords/password.txt` if it exists, otherwise auto-generate passwords
-- **When using auto-generated passwords, the tool will start from the specified `--max-length` and automatically try all shorter lengths down to 1**
+- **When using auto-generated passwords or usernames, the tool will start from the specified `--max-length` and automatically try all shorter lengths down to 1**
 - **You can use `--delay` to control the time (in seconds) between each password attempt (e.g., `--delay 0.1` for fast testing)**
 
 ## Warning
