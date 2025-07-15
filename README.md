@@ -7,10 +7,7 @@ Auto brute force web login forms tool
 ### Create and activate a virtual environment
 
 ```bash
-# Create a new virtual environment (named venv)
 python -m venv venv
-
-# Activate the virtual environment
 # On Windows:
 venv\Scripts\activate
 # On macOS/Linux:
@@ -25,41 +22,60 @@ pip install autopasscrack
 
 ## Usage
 
-### Command Line
+### Command Line Examples
 
+#### 1. **Quick Start (auto password generation)**
 ```bash
-# Basic usage with only URL (auto password generation if no file found)
 autopasscrack https://example.com/login
-
-# Specify username and password file
-autopasscrack https://example.com/login --username myuser --passwords passwords.txt
-
-# Specify only password file (no username)
-autopasscrack https://example.com/login --passwords passwords.txt
-
-# Specify only password string (no username, try all usernames)
-autopasscrack https://example.com/login --passwords Password123
-
-# Specify only password, use multiple candidates (comma separated, no username)
-autopasscrack https://example.com/login --passwords "Password123,abc123,letmein"
-
-# Specify only username (use auto password generation)
-autopasscrack https://example.com/login --username myuser
-
-# Use multiple parallel browser windows (e.g., 4 workers)
-autopasscrack https://example.com/login --workers 4
-
-# Auto-generate all passwords up to a maximum length (e.g., 6)
-autopasscrack https://example.com/login --max-length 6
-
-# Use both workers and max-length (e.g., try all 6, 5, 4, 3, 2, 1 length passwords in parallel)
-autopasscrack https://example.com/login --workers 2 --max-length 6
-
-# Set delay between each password attempt to 0.1 seconds (faster testing)
-autopasscrack https://example.com/login --delay 0.1
 ```
+- If neither username nor password is specified, autopasscrack will try **all possible username/password combinations** (very slow, for research/testing only).
 
-### Python API
+#### 2. **Specify username, auto-generate passwords**
+```bash
+autopasscrack https://example.com/login --username myuser
+```
+- Tries all possible passwords for the given username.
+
+#### 3. **Specify password(s), auto-generate usernames**
+```bash
+autopasscrack https://example.com/login --passwords Password123
+```
+- Tries all possible usernames with the given password.
+- You can use a file or comma-separated passwords:
+  - `--passwords passwords.txt`
+  - `--passwords "Password123,abc123,letmein"`
+
+#### 4. **Specify both username and password(s)**
+```bash
+autopasscrack https://example.com/login --username myuser --passwords passwords.txt
+```
+- Tries all passwords in the file for the given username.
+
+#### 5. **Parallel mode (multiple browser windows)**
+```bash
+autopasscrack https://example.com/login --username myuser --passwords passwords.txt --workers 4
+```
+- Use multiple browser windows for faster brute force.
+
+#### 6. **Limit password/username length**
+```bash
+autopasscrack https://example.com/login --username myuser --max-length 6
+```
+- Auto-generate all passwords up to a maximum length (default: 4, max: 20).
+
+#### 7. **Set delay between attempts**
+```bash
+autopasscrack https://example.com/login --username myuser --delay 0.1
+```
+- Set delay (in seconds) between each attempt (default: 2).
+
+#### 8. **Specify success URL for accurate detection**
+```bash
+autopasscrack https://example.com/login --username myuser --passwords Password123 --success_url https://example.com/success
+```
+- Use this if the login is only successful when redirected to a specific URL.
+
+### Python API Example
 
 ```python
 from autopasscrack.auto_brute import brute_force
@@ -77,6 +93,7 @@ brute_force(
 - Supports custom password file or auto-generates passwords (all upper/lowercase letters, digits, special symbols)
 - Supports direct password string or comma-separated passwords via --passwords (no need for a file)
 - Supports auto-generating usernames (all upper/lowercase letters, digits, special symbols) if only --passwords is given and --username is omitted
+- Supports **full auto mode**: if neither username nor password is given, tries all possible username/password combinations (very slow, for research/testing only)
 - Supports parallel browser windows with --workers
 - If no password file is provided, will use `default_passwords/password.txt` if it exists, otherwise auto-generate passwords
 - **When using auto-generated passwords or usernames, the tool will start from the specified `--max-length` and automatically try all shorter lengths down to 1**
