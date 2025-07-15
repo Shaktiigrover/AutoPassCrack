@@ -21,7 +21,6 @@ source venv/bin/activate
 
 ```bash
 pip install autopasscrack
-pip install -r requirements.txt
 ```
 
 ## Usage
