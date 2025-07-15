@@ -20,6 +20,7 @@ source venv/bin/activate
 ### Install dependencies
 
 ```bash
+pip install autopasscrack
 pip install -r requirements.txt
 ```
 
@@ -42,6 +43,15 @@ autopasscrack https://example.com/login --username myuser
 
 # Use multiple parallel browser windows (e.g., 4 workers)
 autopasscrack https://example.com/login --workers 4
+
+# Auto-generate all passwords up to a maximum length (e.g., 6)
+autopasscrack https://example.com/login --max-length 6
+
+# Use both workers and max-length (e.g., try all 6, 5, 4, 3, 2, 1 length passwords in parallel)
+autopasscrack https://example.com/login --workers 2 --max-length 6
+
+# Set delay between each password attempt to 0.1 seconds (faster testing)
+autopasscrack https://example.com/login --delay 0.1
 ```
 
 ### Python API
@@ -52,7 +62,8 @@ from autopasscrack.auto_brute import brute_force
 brute_force(
     url="https://example.com/login",
     username="myuser",
-    password_list=["123456", "password", "letmein"]
+    password_list=["123456", "password", "letmein"],
+    delay=0.1  # Set delay between attempts to 0.1 seconds
 )
 ```
 
@@ -61,6 +72,8 @@ brute_force(
 - Supports custom password file or auto-generates passwords (all upper/lowercase letters, digits, special symbols)
 - Supports parallel browser windows with --workers
 - If no password file is provided, will use `default_passwords/password.txt` if it exists, otherwise auto-generate passwords
+- **When using auto-generated passwords, the tool will start from the specified `--max-length` and automatically try all shorter lengths down to 1**
+- **You can use `--delay` to control the time (in seconds) between each password attempt (e.g., `--delay 0.1` for fast testing)**
 
 ## Warning
 - For legal penetration testing and educational use only. **Do not use on unauthorized websites.**
