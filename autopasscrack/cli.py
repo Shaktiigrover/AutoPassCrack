@@ -167,6 +167,8 @@ def main():
             found_flag = manager.Value('b', False)
             for un_length in range(max_length, 0, -1):
                 for pw_length in range(max_length, 0, -1):
+                    if found_flag.value:
+                        break
                     print(f"[INFO] Trying all username/password combinations: username length {un_length}, password length {pw_length}...")
                     total = (len(charset) ** un_length) * (len(charset) ** pw_length)
                     chunk_size = total // args.workers
@@ -179,8 +181,11 @@ def main():
                         processes.append(p)
                     for p in processes:
                         p.join()
-                    # Do NOT break after found_flag.value, continue to next length
-            print("[INFO] All username/password combinations tried, no login succeeded.")
+                    if found_flag.value:
+                        print(f"[INFO] Username/password found at username length {un_length}, password length {pw_length}, stopping further attempts.")
+                        break
+            else:
+                print("[INFO] All username/password combinations tried, no login succeeded.")
         return
 
     password_list = None
