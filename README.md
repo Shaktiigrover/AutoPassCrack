@@ -6,18 +6,15 @@
 [![MIT License](https://img.shields.io/github/license/HenryLok0/autopasscrack?style=flat-square)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/HenryLok0/autopasscrack?style=flat-square)](https://github.com/HenryLok0/autopasscrack/stargazers)
 
-Auto brute force web login forms tool
+A professional, flexible, and user-friendly tool for automated brute-forcing of web login forms. Supports advanced field detection, custom password/username generation, parallel execution, and more.
 
 ## Installation
 
 ### Create and activate a virtual environment
 
 ```bash
-python -m venv venv
-# On Windows:
-venv\Scripts\activate
-# On macOS/Linux:
-source venv/bin/activate
+-m venv venv
+source venv/bin/activate         # On Windows: venv\Scripts\activate
 ```
 
 ### Install dependencies
