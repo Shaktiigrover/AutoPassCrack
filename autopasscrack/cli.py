@@ -24,6 +24,7 @@ def username_range_generator(start, end, charset, length):
     for idx in range(start, end):
         yield index_to_password(idx, charset, length)
 
+# --- Worker functions must be at module level for multiprocessing on Windows ---
 def worker_list_mode(sublist, args, found_flag):
     from .auto_brute import brute_force
     if not found_flag.value:
@@ -52,6 +53,40 @@ def worker_gen_mode(start, end, charset, pw_length, args, found_flag):
         )
         if result:
             found_flag.value = True
+
+def worker_username_mode(start, end, charset, un_length, password_list, args, found_flag):
+    from .auto_brute import brute_force
+    un_gen = username_range_generator(start, end, charset, un_length)
+    if not found_flag.value:
+        result = brute_force(
+            url=args.url,
+            username=un_gen,
+            password_list=password_list,
+            delay=args.delay,
+            success_url=args.success_url,
+            verbose=True
+        )
+        if result:
+            found_flag.value = True
+
+def worker_both_mode(start, end, charset, un_length, pw_length, args, found_flag):
+    from .auto_brute import brute_force
+    for idx in range(start, end):
+        uname_idx = idx // (len(charset) ** pw_length)
+        pwd_idx = idx % (len(charset) ** pw_length)
+        uname = index_to_password(uname_idx, charset, un_length)
+        pwd = index_to_password(pwd_idx, charset, pw_length)
+        result = brute_force(
+            url=args.url,
+            username=uname,
+            password_list=[pwd],
+            delay=args.delay,
+            success_url=args.success_url,
+            verbose=True
+        )
+        if result:
+            found_flag.value = True
+            break
 
 def main():
     parser = argparse.ArgumentParser(description="Auto password brute force for web login forms.")
@@ -117,30 +152,6 @@ def main():
                     total = (len(charset) ** un_length) * (len(charset) ** pw_length)
                     chunk_size = total // args.workers
                     processes = []
-                    def worker_both_mode(start, end, charset, un_length, pw_length, args, found_flag):
-                        from .auto_brute import brute_force
-                        # 產生 username/password 組合
-                        for idx in range(start, end):
-                            uname_idx = idx // (len(charset) ** pw_length)
-                            pwd_idx = idx % (len(charset) ** pw_length)
-                            # 產生 username
-                            uname = index_to_password(uname_idx, charset, un_length)
-                            # 產生 password
-                            pwd = index_to_password(pwd_idx, charset, pw_length)
-                            # 嘗試登入
-                            result = brute_force(
-                                url=args.url,
-                                username=uname,
-                                password_list=[pwd],
-                                delay=args.delay,
-                                success_url=args.success_url,
-                                verbose=True
-                            )
-                            if result:
-                                found_flag.value = True
-                                break
-                    total = (len(charset) ** un_length) * (len(charset) ** pw_length)
-                    chunk_size = total // args.workers
                     for i in range(args.workers):
                         start = i * chunk_size
                         end = (i+1) * chunk_size if i < args.workers - 1 else total
