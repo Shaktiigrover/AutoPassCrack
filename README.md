@@ -90,6 +90,48 @@ autopasscrack https://example.com/login --common-passwords common_pw.txt --commo
 ```
 - Try common passwords/usernames first before brute force.
 
+#### 11. **Custom login field selector**
+```bash
+autopasscrack https://example.com/login --username myuser --passwords passwords.txt --username-selector '#user' --password-selector '#pass'
+```
+- If auto-detection fails, you can specify the username and password field selectors manually.
+
+#### 12. **Use Proxy**
+```bash
+autopasscrack https://example.com/login --username myuser --passwords passwords.txt --proxy http://127.0.0.1:8080
+```
+- Specify an HTTP/HTTPS proxy server for all requests.
+
+#### 13. **Dry-run mode**
+```bash
+autopasscrack https://example.com/login --username myuser --passwords passwords.txt --dry-run
+```
+- Only test the first username/password pair for quick debugging.
+
+#### 14. **Log progress and results to file**
+```bash
+autopasscrack https://example.com/login --username myuser --passwords passwords.txt --logfile result.log
+```
+- Progress and results will be written to the specified log file.
+
+#### 15. **Custom success message**
+```bash
+autopasscrack https://example.com/login --username myuser --passwords passwords.txt --success-message "Welcome"
+```
+- If the page contains the specified message after login, it will be treated as a successful login.
+
+---
+
+## Advanced Features and Improvements
+- **Resume enhancement**: Resume now supports full auto mode, accurately restoring username/password combination and index.
+- **Multiprocessing terminate**: In multi-worker mode, if any worker finds a valid credential, all other workers are terminated immediately for efficiency.
+- **Common-passwords priority**: If a common-passwords file is specified, those passwords are always tried first.
+- **Custom field selector**: Use `--username-selector` and `--password-selector` to specify login fields if auto-detection fails.
+- **Proxy support**: Use `--proxy` to specify an HTTP/HTTPS proxy server.
+- **Dry-run mode**: Only test one username/password pair for debugging.
+- **Log file**: Progress and results can be written to a log file with `--logfile`.
+- **Custom success message**: Use `--success-message` to specify a string that indicates a successful login on the page.
+
 ### Python API Example
 
 ```python
