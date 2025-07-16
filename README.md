@@ -168,3 +168,22 @@ brute_force(
 ## Warning
 - For legal penetration testing and educational use only. **Do not use on unauthorized websites.**
 - Requires ChromeDriver installed and in your PATH.
+---
+
+## Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+---
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+## Support
+
+If you have questions or need help, please open an issue on GitHub.
+
+Thank you to all contributors and the open-source community for your support.
