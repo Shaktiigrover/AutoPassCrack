@@ -180,15 +180,15 @@ def main():
     max_pw_length = min(args.max_length, 20)
 
     if args.passwords:
-        # Try to treat --passwords as a file path first
+        # If --passwords is a file and exists, use file as password list
         if os.path.isfile(args.passwords):
             with open(args.passwords, encoding='utf-8') as f:
                 password_list = [line.strip() for line in f if line.strip()]
+            is_generator = False
         else:
             # If file does not exist, treat as direct password string (support comma separated)
-            # If user provides --passwords "Password123,abc123", split by comma
             password_list = [pw.strip() for pw in args.passwords.split(',') if pw.strip()]
-        is_generator = False
+            is_generator = False
     else:
         # Check if default_passwords/password.txt exists
         pwd_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'default_passwords', 'password.txt')
