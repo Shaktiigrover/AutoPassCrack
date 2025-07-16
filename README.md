@@ -107,7 +107,7 @@ brute_force(
 - The tool now detects all possible username/email fields based on type, name, id, placeholder, and aria-label attributes (keywords: user, email, login, account), and pairs them with all password fields. This increases compatibility with various login forms.
 
 ## Password Strength Test Tool
-- A simple password strength checker is available at `docs/password_strength_test.html`. Open it in your browser to test password strength (length, upper/lowercase, digit, symbol).
+- A simple password strength checker is available at `docs/index.html`. Open it in your browser to test password strength (length, upper/lowercase, digit, symbol).
 
 ## Features
 - Auto-detects all possible login form field pairs (username/email and password) using advanced heuristics
@@ -121,7 +121,7 @@ brute_force(
 - **Prioritize common passwords/usernames**: use `--common-passwords` and `--common-usernames` to try common values first
 - **When using auto-generated passwords or usernames, the tool will start from the specified `--max-length` and automatically try all shorter lengths down to 1**
 - **You can use `--delay` to control the time (in seconds) between each password attempt (e.g., `--delay 0.1` for fast testing)**
-- Includes a password strength HTML tool in `/docs/password_strength_test.html`
+- Includes a password strength HTML tool in `/docs/index.html`
 
 ## Warning
 - For legal penetration testing and educational use only. **Do not use on unauthorized websites.**
