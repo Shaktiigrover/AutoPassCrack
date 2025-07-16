@@ -123,6 +123,48 @@ brute_force(
 - **You can use `--delay` to control the time (in seconds) between each password attempt (e.g., `--delay 0.1` for fast testing)**
 - Includes a password strength HTML tool in `/docs/index.html`
 
+
+## Resume & Progress Display
+
+### Resume (Interrupted Session)
+- You can use `--resume` to continue from where you left off if the process was interrupted (supports both single and multi-worker modes).
+- Progress is automatically saved to `.autopasscrack_resume.json`.
+- When resuming, only untried passwords/usernames will be distributed to workers, ensuring no duplicates or missing attempts.
+- After a successful run, the resume file is automatically cleared.
+
+#### Example:
+```bash
+autopasscrack https://example.com/login --username myuser --passwords passwords.txt --workers 4 --resume
+```
+- If interrupted, rerun with `--resume` to continue from last progress.
+
+### CLI Progress Display
+- The tool shows real-time progress, including current attempt, total attempts, percentage, elapsed time, and estimated time left.
+- Example output:
+  ```
+  Progress: 3/100 (3.00%), Elapsed: 2.1s, ETA: 67.9s
+  ```
+
 ## Warning
 - For legal penetration testing and educational use only. **Do not use on unauthorized websites.**
 - Requires ChromeDriver installed and in your PATH.
+
+---
+
+## Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+---
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+## Support
+
+If you have questions or need help, please open an issue on GitHub.
+
+Thank you to all contributors and the open-source community for your support.

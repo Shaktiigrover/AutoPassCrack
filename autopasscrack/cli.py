@@ -4,6 +4,26 @@ import string
 import itertools
 import math
 from multiprocessing import Process, Manager
+import json
+import time
+
+RESUME_FILE = '.autopasscrack_resume.json'
+
+def save_resume(state):
+    with open(RESUME_FILE, 'w', encoding='utf-8') as f:
+        json.dump(state, f)
+
+def load_resume():
+    try:
+        with open(RESUME_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+def clear_resume():
+    import os
+    if os.path.exists(RESUME_FILE):
+        os.remove(RESUME_FILE)
 
 def index_to_password(idx, charset, length):
     # Convert integer idx to a password string in the given charset
@@ -102,6 +122,7 @@ def main():
     parser.add_argument('--whitelist', help='Whitelist characters for password/username generation', default=None)
     parser.add_argument('--common-passwords', help='File with common passwords to try first', default=None)
     parser.add_argument('--common-usernames', help='File with common usernames to try first', default=None)
+    parser.add_argument('--resume', action='store_true', help='Resume from last progress if available')
     args = parser.parse_args()
 
     # 判斷模式：
@@ -210,30 +231,67 @@ def main():
         with open(args.common_usernames, encoding='utf-8') as f:
             common_usernames = [line.strip() for line in f if line.strip()]
 
+    # Progress/resume state
+    resume_state = None
+    if args.resume:
+        resume_state = load_resume()
+        if resume_state:
+            print('[INFO] Resuming from last saved progress...')
+
+    # For multi-worker resume: filter out already tried passwords
+    if args.resume and resume_state and args.workers > 1 and not is_generator:
+        tried = set(resume_state.get('tried', []))
+        password_list = [pw for pw in password_list if pw not in tried]
+        print(f'[INFO] Resuming: {len(password_list)} passwords left to try.')
+
+    def print_progress(current, total, start_time):
+        percent = (current / total) * 100 if total else 0
+        elapsed = time.time() - start_time
+        eta = (elapsed / current) * (total - current) if current else 0
+        print(f'Progress: {current}/{total} ({percent:.2f}%), Elapsed: {elapsed:.1f}s, ETA: {eta:.1f}s', end='\r')
+
     if not is_generator:
         # list mode
         if args.workers == 1:
             from .auto_brute import brute_force
-            brute_force(
-                url=args.url,
-                username=args.username,
-                password_list=password_list,
-                delay=args.delay,
-                success_url=args.success_url,
-                verbose=True
-            )
+            total = len(password_list)
+            start_time = time.time()
+            for idx, pwd in enumerate(password_list):
+                print_progress(idx+1, total, start_time)
+                # Save resume state
+                if args.resume:
+                    save_resume({'index': idx+1, 'total': total, 'passwords': password_list})
+                brute_force(
+                    url=args.url,
+                    username=args.username,
+                    password_list=[pwd],
+                    delay=args.delay,
+                    success_url=args.success_url,
+                    verbose=True
+                )
+            print()  # Newline after progress
+            if args.resume:
+                clear_resume()
         else:
             chunk_size = math.ceil(len(password_list) / args.workers)
             processes = []
             with Manager() as manager:
                 found_flag = manager.Value('b', False)
+                # For resume: track which passwords have been tried
+                tried_pw = resume_state.get('tried', []) if args.resume and resume_state else []
                 for i in range(args.workers):
                     sublist = password_list[i*chunk_size:(i+1)*chunk_size]
+                    # Remove already tried passwords from sublist
+                    sublist = [pw for pw in sublist if pw not in tried_pw]
                     p = Process(target=worker_list_mode, args=(sublist, args, found_flag))
                     p.start()
                     processes.append(p)
                 for p in processes:
                     p.join()
+                # After all workers, save which passwords have been tried
+                if args.resume:
+                    tried_pw += password_list
+                    save_resume({'tried': tried_pw})
     else:
         # Auto-generate passwords, try from max_pw_length down to 1
         with Manager() as manager:

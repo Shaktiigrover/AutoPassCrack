@@ -158,13 +158,13 @@ def brute_force(url, username, password_list, delay=2, success_url=None, verbose
         login_success = False
         if success_url:
             if driver.current_url.startswith(success_url):
-                print(f"Login success! Password is: {pwd}")
+                print(f"Login success! Username: {username} Password: {pwd}")
                 driver.quit()
                 return pwd
         else:
             # Only check if URL changed or generic error message (no Chinese)
             if url not in driver.current_url:
-                print(f"Login success! Password is: {pwd}")
+                print(f"Login success! Username: {username} Password: {pwd}")
                 driver.quit()
                 return pwd
         # --- If not successful, try to auto-detect and click submit/login buttons ---
@@ -203,13 +203,13 @@ def brute_force(url, username, password_list, delay=2, success_url=None, verbose
         # Check again if login was successful after clicking buttons
         if success_url:
             if driver.current_url.startswith(success_url):
-                print(f"Login success! Password is: {pwd}")
+                print(f"Login success! Username: {username} Password: {pwd}")
                 driver.quit()
                 return pwd
         else:
             # Only check if URL changed or generic error message (no Chinese)
             if url not in driver.current_url:
-                print(f"Login success! Password is: {pwd}")
+                print(f"Login success! Username: {username} Password: {pwd}")
                 driver.quit()
                 return pwd
     print("All passwords tried, none succeeded.")
