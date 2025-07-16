@@ -4,6 +4,8 @@ import string
 import itertools
 import math
 from multiprocessing import Process, Manager
+import sys
+import time
 
 def index_to_password(idx, charset, length):
     # Convert integer idx to a password string in the given charset
@@ -24,34 +26,81 @@ def username_range_generator(start, end, charset, length):
     for idx in range(start, end):
         yield index_to_password(idx, charset, length)
 
-def worker_list_mode(sublist, args, found_flag):
+def print_progress(current, total, start_time):
+    # Print progress bar for CLI
+    percent = (current / total) * 100 if total else 0
+    elapsed = time.time() - start_time
+    eta = (elapsed / current) * (total - current) if current else 0
+    msg = f'Progress: {current}/{total} ({percent:.2f}%), Elapsed: {elapsed:.1f}s, ETA: {eta:.1f}s'
+    print(msg, end='\r', flush=True)
+
+def worker_list_mode(sublist, args, found_flag, progress_dict, worker_id):
     from .auto_brute import brute_force
-    if not found_flag.value:
+    total = len(sublist)
+    start_time = time.time()
+    for idx, pw in enumerate(sublist):
+        if found_flag.value:
+            break
         result = brute_force(
             url=args.url,
             username=args.username,
-            password_list=sublist,
+            password_list=[pw],
             delay=args.delay,
             success_url=args.success_url,
             verbose=True
         )
+        progress_dict[worker_id] = idx + 1
         if result:
             found_flag.value = True
+            break
+        print_progress(sum(progress_dict.values()), progress_dict['total'], start_time)
 
-def worker_gen_mode(start, end, charset, pw_length, args, found_flag):
+def worker_gen_mode(start, end, charset, pw_length, args, found_flag, progress_dict, worker_id):
     from .auto_brute import brute_force
     pw_gen = password_range_generator(start, end, charset, pw_length)
-    if not found_flag.value:
+    total = end - start
+    start_time = time.time()
+    for idx, pw in enumerate(pw_gen):
+        if found_flag.value:
+            break
         result = brute_force(
             url=args.url,
             username=args.username,
-            password_list=pw_gen,
+            password_list=[pw],
             delay=args.delay,
             success_url=args.success_url,
             verbose=True
         )
+        progress_dict[worker_id] = idx + 1
         if result:
             found_flag.value = True
+            break
+        print_progress(sum(progress_dict.values()), progress_dict['total'], start_time)
+
+def worker_both_mode(start, end, charset, un_length, pw_length, args, found_flag, progress_dict, worker_id):
+    from .auto_brute import brute_force
+    total = end - start
+    start_time = time.time()
+    for idx in range(start, end):
+        if found_flag.value:
+            break
+        uname_idx = idx // (len(charset) ** pw_length)
+        pwd_idx = idx % (len(charset) ** pw_length)
+        uname = index_to_password(uname_idx, charset, un_length)
+        pwd = index_to_password(pwd_idx, charset, pw_length)
+        result = brute_force(
+            url=args.url,
+            username=uname,
+            password_list=[pwd],
+            delay=args.delay,
+            success_url=args.success_url,
+            verbose=True
+        )
+        progress_dict[worker_id] = idx - start + 1
+        if result:
+            found_flag.value = True
+            break
+        print_progress(sum(progress_dict.values()), progress_dict['total'], start_time)
 
 def main():
     parser = argparse.ArgumentParser(description="Auto password brute force for web login forms.")
@@ -104,34 +153,13 @@ def main():
                     total = (len(charset) ** un_length) * (len(charset) ** pw_length)
                     chunk_size = total // args.workers
                     processes = []
-                    def worker_both_mode(start, end, charset, un_length, pw_length, args, found_flag):
-                        from .auto_brute import brute_force
-                        # 產生 username/password 組合
-                        for idx in range(start, end):
-                            uname_idx = idx // (len(charset) ** pw_length)
-                            pwd_idx = idx % (len(charset) ** pw_length)
-                            # 產生 username
-                            uname = index_to_password(uname_idx, charset, un_length)
-                            # 產生 password
-                            pwd = index_to_password(pwd_idx, charset, pw_length)
-                            # 嘗試登入
-                            result = brute_force(
-                                url=args.url,
-                                username=uname,
-                                password_list=[pwd],
-                                delay=args.delay,
-                                success_url=args.success_url,
-                                verbose=True
-                            )
-                            if result:
-                                found_flag.value = True
-                                break
-                    total = (len(charset) ** un_length) * (len(charset) ** pw_length)
-                    chunk_size = total // args.workers
+                    progress_dict = manager.dict()
+                    progress_dict['total'] = total
                     for i in range(args.workers):
                         start = i * chunk_size
                         end = (i+1) * chunk_size if i < args.workers - 1 else total
-                        p = Process(target=worker_both_mode, args=(start, end, charset, un_length, pw_length, args, found_flag))
+                        progress_dict[i] = 0
+                        p = Process(target=worker_both_mode, args=(start, end, charset, un_length, pw_length, args, found_flag, progress_dict, i))
                         p.start()
                         processes.append(p)
                     for p in processes:
@@ -172,22 +200,30 @@ def main():
         # list mode
         if args.workers == 1:
             from .auto_brute import brute_force
-            brute_force(
-                url=args.url,
-                username=args.username,
-                password_list=password_list,
-                delay=args.delay,
-                success_url=args.success_url,
-                verbose=True
-            )
+            total = len(password_list)
+            start_time = time.time()
+            for idx, pwd in enumerate(password_list):
+                print_progress(idx+1, total, start_time)
+                brute_force(
+                    url=args.url,
+                    username=args.username,
+                    password_list=[pwd],
+                    delay=args.delay,
+                    success_url=args.success_url,
+                    verbose=True
+                )
+            print()  # Newline after progress
         else:
             chunk_size = math.ceil(len(password_list) / args.workers)
             processes = []
             with Manager() as manager:
                 found_flag = manager.Value('b', False)
+                progress_dict = manager.dict()
+                progress_dict['total'] = len(password_list)
                 for i in range(args.workers):
                     sublist = password_list[i*chunk_size:(i+1)*chunk_size]
-                    p = Process(target=worker_list_mode, args=(sublist, args, found_flag))
+                    progress_dict[i] = 0
+                    p = Process(target=worker_list_mode, args=(sublist, args, found_flag, progress_dict, i))
                     p.start()
                     processes.append(p)
                 for p in processes:
@@ -203,10 +239,13 @@ def main():
                 total = len(charset) ** pw_length
                 chunk_size = total // args.workers
                 processes = []
+                progress_dict = manager.dict()
+                progress_dict['total'] = total
                 for i in range(args.workers):
                     start = i * chunk_size
                     end = (i+1) * chunk_size if i < args.workers - 1 else total
-                    p = Process(target=worker_gen_mode, args=(start, end, charset, pw_length, args, found_flag))
+                    progress_dict[i] = 0
+                    p = Process(target=worker_gen_mode, args=(start, end, charset, pw_length, args, found_flag, progress_dict, i))
                     p.start()
                     processes.append(p)
                 for p in processes:
