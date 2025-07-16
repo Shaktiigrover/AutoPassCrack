@@ -81,6 +81,18 @@ autopasscrack https://example.com/login --username myuser --passwords Password12
 ```
 - Use this if the login is only successful when redirected to a specific URL.
 
+#### 9. **Custom charset, blacklist, whitelist for password/username generation**
+```bash
+autopasscrack https://example.com/login --username myuser --charset abcdef1234 --blacklist f --whitelist abc123
+```
+- Use a custom charset, exclude or include specific characters for brute force.
+
+#### 10. **Prioritize common passwords/usernames**
+```bash
+autopasscrack https://example.com/login --common-passwords common_pw.txt --common-usernames common_users.txt
+```
+- Try common passwords/usernames first before brute force.
+
 ### Python API Example
 
 ```python
@@ -94,16 +106,25 @@ brute_force(
 )
 ```
 
+## Advanced Login Field Detection
+- The tool now detects all possible username/email fields based on type, name, id, placeholder, and aria-label attributes (keywords: user, email, login, account), and pairs them with all password fields. This increases compatibility with various login forms.
+
+## Password Strength Test Tool
+- A simple password strength checker is available at `docs/password_strength_test.html`. Open it in your browser to test password strength (length, upper/lowercase, digit, symbol).
+
 ## Features
-- Auto-detects login form fields (username and/or password)
+- Auto-detects all possible login form field pairs (username/email and password) using advanced heuristics
 - Supports custom password file or auto-generates passwords (all upper/lowercase letters, digits, special symbols)
 - Supports direct password string or comma-separated passwords via --passwords (no need for a file)
 - Supports auto-generating usernames (all upper/lowercase letters, digits, special symbols) if only --passwords is given and --username is omitted
 - Supports **full auto mode**: if neither username nor password is given, tries all possible username/password combinations (very slow, for research/testing only)
 - Supports parallel browser windows with --workers
 - If no password file is provided, will use `default_passwords/password.txt` if it exists, otherwise auto-generate passwords
+- **Flexible brute force charset**: use `--charset`, `--blacklist`, `--whitelist` to control which characters are used
+- **Prioritize common passwords/usernames**: use `--common-passwords` and `--common-usernames` to try common values first
 - **When using auto-generated passwords or usernames, the tool will start from the specified `--max-length` and automatically try all shorter lengths down to 1**
 - **You can use `--delay` to control the time (in seconds) between each password attempt (e.g., `--delay 0.1` for fast testing)**
+- Includes a password strength HTML tool in `/docs/password_strength_test.html`
 
 ## Warning
 - For legal penetration testing and educational use only. **Do not use on unauthorized websites.**

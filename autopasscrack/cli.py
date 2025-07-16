@@ -62,6 +62,11 @@ def main():
     parser.add_argument('--success_url', help='URL after successful login (optional)')
     parser.add_argument('--workers', type=int, default=1, help='Number of parallel browser windows (default: 1)')
     parser.add_argument('--max-length', type=int, default=4, help='Max password length for auto generation (default: 4, max: 20)')
+    parser.add_argument('--charset', help='Custom charset for password/username generation (default: letters+digits+punctuation)', default=None)
+    parser.add_argument('--blacklist', help='Blacklist characters for password/username generation', default=None)
+    parser.add_argument('--whitelist', help='Whitelist characters for password/username generation', default=None)
+    parser.add_argument('--common-passwords', help='File with common passwords to try first', default=None)
+    parser.add_argument('--common-usernames', help='File with common usernames to try first', default=None)
     args = parser.parse_args()
 
     # 判斷模式：
@@ -93,7 +98,15 @@ def main():
     if is_gen_both:
         # 完全自動產生所有 username/password 組合
         max_length = min(args.max_length, 20)
-        charset = string.ascii_letters + string.digits + string.punctuation
+        # Determine charset
+        if args.charset:
+            charset = args.charset
+        else:
+            charset = string.ascii_letters + string.digits + string.punctuation
+        if args.blacklist:
+            charset = ''.join([c for c in charset if c not in args.blacklist])
+        if args.whitelist:
+            charset = ''.join([c for c in charset if c in args.whitelist])
         with Manager() as manager:
             found_flag = manager.Value('b', False)
             for un_length in range(max_length, 0, -1):
@@ -144,7 +157,15 @@ def main():
         return
 
     password_list = None
-    charset = string.ascii_letters + string.digits + string.punctuation
+    # Determine charset
+    if args.charset:
+        charset = args.charset
+    else:
+        charset = string.ascii_letters + string.digits + string.punctuation
+    if args.blacklist:
+        charset = ''.join([c for c in charset if c not in args.blacklist])
+    if args.whitelist:
+        charset = ''.join([c for c in charset if c in args.whitelist])
     max_pw_length = min(args.max_length, 20)
 
     if args.passwords:
@@ -167,6 +188,16 @@ def main():
         else:
             # Dynamically generate passwords up to pw_length
             is_generator = True
+
+    # Prioritize common passwords/usernames if provided
+    common_passwords = []
+    if args.common_passwords and os.path.isfile(args.common_passwords):
+        with open(args.common_passwords, encoding='utf-8') as f:
+            common_passwords = [line.strip() for line in f if line.strip()]
+    common_usernames = []
+    if args.common_usernames and os.path.isfile(args.common_usernames):
+        with open(args.common_usernames, encoding='utf-8') as f:
+            common_usernames = [line.strip() for line in f if line.strip()]
 
     if not is_generator:
         # list mode
