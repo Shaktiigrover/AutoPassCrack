@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='autopasscrack',
-    version='0.1.0',
+    version='0.1.1',
     description='Auto brute force web login forms with password list',
     author='Your Name',
     packages=find_packages(),  # 只要這一行
