@@ -10,17 +10,14 @@ A professional, flexible, and user-friendly tool for automated brute-forcing of 
 
 ## Installation
 
-### Create and activate a virtual environment
-
-```bash
--m venv venv
-source venv/bin/activate         # On Windows: venv\Scripts\activate
-```
-
-### Install dependencies
-
 ```bash
 pip install autopasscrack
+```
+
+Or for local development:
+
+```bash
+pip install .
 ```
 
 ## Usage
