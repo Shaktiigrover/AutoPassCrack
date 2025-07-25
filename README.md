@@ -14,12 +14,6 @@ A professional, flexible, and user-friendly tool for automated brute-forcing of 
 pip install autopasscrack
 ```
 
-Or for local development:
-
-```bash
-pip install .
-```
-
 ## Usage
 
 ### Command Line Examples
